@@ -1,6 +1,6 @@
-FROM node:8.10-alpine
+FROM node:8.10
 MAINTAINER ahmet@cetin.info
-ENV FFMPEG_VERSION=3.3.1
+ENV FFMPEG_VERSION=3.4.2
 
 WORKDIR /tmp/ffmpeg
 
