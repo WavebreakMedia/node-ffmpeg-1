@@ -1,4 +1,4 @@
-FROM node:7.9-alpine AS base
+FROM node:9.8-alpine AS base
 MAINTAINER ahmet@cetin.info
 
 RUN     apk  add --no-cache --update libgcc libstdc++ ca-certificates libcrypto1.0 libssl1.0 libgomp expat
