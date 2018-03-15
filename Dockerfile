@@ -1,4 +1,4 @@
-FROM node:8.10
+FROM node:9.8-alpine
 MAINTAINER ahmet@cetin.info
 ENV FFMPEG_VERSION=3.4.2
 
