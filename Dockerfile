@@ -3,6 +3,8 @@ MAINTAINER ahmet@cetin.info
 
 RUN     apk  add --no-cache --update libgcc libstdc++ ca-certificates libcrypto1.0 libssl1.0 libgomp expat
 
+FROM        base AS build
+
 WORKDIR     /tmp/workdir
 
 ARG        PKG_CONFIG_PATH=/opt/ffmpeg/lib/pkgconfig
@@ -352,7 +354,7 @@ RUN \
 
 ### Release Stage
 FROM        base AS release
-MAINTAINER  Julien Rottenberg <julien@rottenberg.info>
+MAINTAINER ahmet@cetin.info
 
 CMD         ["--help"]
 ENTRYPOINT  ["ffmpeg"]
