@@ -1,4 +1,4 @@
-FROM node:9.8-alpine AS base
+FROM node:8.12-alpine AS base
 MAINTAINER ahmet@cetin.info
 
 RUN     apk  add --no-cache --update libgcc libstdc++ ca-certificates libcrypto1.0 libssl1.0 libgomp expat
@@ -13,12 +13,12 @@ ARG        LD_LIBRARY_PATH=/opt/ffmpeg/lib
 ARG        PREFIX=/opt/ffmpeg
 ARG        MAKEFLAGS="-j2"
 
-ENV         FFMPEG_VERSION=3.4.2     \
+ENV         FFMPEG_VERSION=4.0.2     \
             FDKAAC_VERSION=0.1.5      \
             LAME_VERSION=3.99.5       \
             LIBASS_VERSION=0.13.7     \
             OGG_VERSION=1.3.2         \
-            OPENCOREAMR_VERSION=0.1.4 \
+            OPENCOREAMR_VERSION=0.1.5 \
             OPUS_VERSION=1.2          \
             OPENJPEG_VERSION=2.1.2    \
             THEORA_VERSION=1.1.1      \
@@ -32,6 +32,7 @@ ENV         FFMPEG_VERSION=3.4.2     \
             FONTCONFIG_VERSION=2.12.4 \
             LIBVIDSTAB_VERSION=1.1.0  \
             KVAZAAR_VERSION=1.2.0     \
+            AOM_VERSION=master        \
             SRC=/usr/local
 
 ARG         OGG_SHA256SUM="e19ee34711d7af328cb26287f4137e70630e7261b17cbe3cd41011d73a654692  libogg-1.3.2.tar.gz"
@@ -72,12 +73,12 @@ RUN \
         DIR=/tmp/opencore-amr && \
         mkdir -p ${DIR} && \
         cd ${DIR} && \
-        curl -sL https://10gbps-io.dl.sourceforge.net/project/opencore-amr/opencore-amr/opencore-amr-${OPENCOREAMR_VERSION}.tar.gz | \
+        curl -sL https://kent.dl.sourceforge.net/project/opencore-amr/opencore-amr/opencore-amr-${OPENCOREAMR_VERSION}.tar.gz | \
         tar -zx --strip-components=1 && \
         ./configure --prefix="${PREFIX}" --enable-shared  && \
         make && \
         make install && \
-        rm -rf ${DIR} 
+        rm -rf ${DIR}
 ## x264 http://www.videolan.org/developers/x264.html
 RUN \
         DIR=/tmp/x264 && \
@@ -158,7 +159,7 @@ RUN \
         cd ${DIR} && \
         curl -sL https://codeload.github.com/webmproject/libvpx/tar.gz/v${VPX_VERSION} | \
         tar -zx --strip-components=1 && \
-        ./configure --prefix="${PREFIX}" --enable-vp8 --enable-vp9 --enable-pic --enable-shared \
+        ./configure --prefix="${PREFIX}" --enable-vp8 --enable-vp9 --enable-vp9-highbitdepth --enable-pic --enable-shared \
         --disable-debug --disable-examples --disable-docs --disable-install-bins  && \
         make && \
         make install && \
@@ -168,7 +169,7 @@ RUN \
         DIR=/tmp/lame && \
         mkdir -p ${DIR} && \
         cd ${DIR} && \
-        curl -sL https://10gbps-io.dl.sourceforge.net/project/lame/lame/$(echo ${LAME_VERSION} | sed -e 's/[^0-9]*\([0-9]*\)[.]\([0-9]*\)[.]\([0-9]*\)\([0-9A-Za-z-]*\)/\1.\2/')/lame-${LAME_VERSION}.tar.gz | \
+        curl -sL https://kent.dl.sourceforge.net/project/lame/lame/$(echo ${LAME_VERSION} | sed -e 's/[^0-9]*\([0-9]*\)[.]\([0-9]*\)[.]\([0-9]*\)\([0-9A-Za-z-]*\)/\1.\2/')/lame-${LAME_VERSION}.tar.gz | \
         tar -zx --strip-components=1 && \
         ./configure --prefix="${PREFIX}" --bindir="${PREFIX}/bin" --enable-shared --enable-nasm --enable-pic --disable-frontend && \
         make && \
@@ -285,7 +286,21 @@ RUN \
         make && \
         make install && \
         rm -rf ${DIR}
-   
+
+RUN \
+        dir=/tmp/aom ; \
+        mkdir -p ${dir} ; \
+        cd ${dir} ; \
+        curl -sLO https://aomedia.googlesource.com/aom/+archive/${AOM_VERSION}.tar.gz ; \
+        tar -zx -f ${AOM_VERSION}.tar.gz ; \
+        rm -rf CMakeCache.txt CMakeFiles ; \
+        mkdir -p ./aom_build ; \
+        cd ./aom_build ; \
+        cmake -DCMAKE_INSTALL_PREFIX="${PREFIX}" -DBUILD_SHARED_LIBS=1 ..; \
+        make ; \
+        make install ; \
+        rm -rf ${dir}
+
 ## ffmpeg https://ffmpeg.org/
 RUN  \
         DIR=$(mktemp -d) && cd ${DIR} && \
@@ -316,6 +331,7 @@ RUN  \
         --enable-openssl \
         --enable-libfdk_aac \
         --enable-libkvazaar \
+        --enable-libaom --extra-libs=-lpthread \
         --enable-postproc \
         --enable-small \
         --enable-version3 \
