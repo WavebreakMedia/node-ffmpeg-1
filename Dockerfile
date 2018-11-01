@@ -356,9 +356,6 @@ RUN \
 FROM        base AS release
 MAINTAINER ahmet@cetin.info
 
-CMD         ["--help"]
-ENTRYPOINT  ["ffmpeg"]
-
 COPY --from=build /usr/local /usr/local
 
 # Let's make sure the app built correctly
