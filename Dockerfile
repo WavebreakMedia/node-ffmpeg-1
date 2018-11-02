@@ -1,11 +1,14 @@
-FROM node:8.12.0-alpine AS base
+FROM node:8.12.0-jessie AS base
 MAINTAINER ahmet@cetin.info
 
-RUN     apk  add --no-cache --update libgcc libstdc++ ca-certificates libcrypto1.0 libssl1.0 libgomp expat
-
-FROM        base AS build
-
 WORKDIR     /tmp/workdir
+
+RUN     apt-get -yqq update && \
+        apt-get install -yq --no-install-recommends ca-certificates expat libgomp1 git python build-essential && \
+        apt-get autoremove -y && \
+        apt-get clean -y
+
+FROM base as build
 
 ARG        PKG_CONFIG_PATH=/opt/ffmpeg/lib/pkgconfig
 ARG        LD_LIBRARY_PATH=/opt/ffmpeg/lib
@@ -45,28 +48,27 @@ ARG         LIBASS_SHA256SUM="8fadf294bf701300d4605e6f1d92929304187fca4b8d8a4788
 ARG         FRIBIDI_SHA256SUM="3fc96fa9473bd31dcb5500bdf1aa78b337ba13eb8c301e7c28923fea982453a8  0.19.7.tar.gz"
 
 
-RUN     buildDeps="autoconf \
-                   automake \
-                   bash \
-                   binutils \
-                   bzip2 \
-                   cmake \
-                   curl \
-                   coreutils \
-                   diffutils \
-                   file \
-                   g++ \
-                   gcc \
-                   gperf \
-                   libtool \
-                   make \
-                   python \
-                   openssl-dev \
-                   tar \
-                   yasm \
-                   zlib-dev \
-                   expat-dev" && \
-        apk  add --no-cache --update ${buildDeps}
+RUN      buildDeps="autoconf \
+                    automake \
+                    cmake \
+                    curl \
+                    bzip2 \
+                    libexpat1-dev \
+                    g++ \
+                    gcc \
+                    git \
+                    gperf \
+                    libtool \
+                    make \
+                    nasm \
+                    perl \
+                    pkg-config \
+                    python \
+                    libssl-dev \
+                    yasm \
+                    zlib1g-dev" && \
+        apt-get -yqq update && \
+        apt-get install -yq --no-install-recommends ${buildDeps}
 ## opencore-amr https://sourceforge.net/projects/opencore-amr/
 RUN \
         DIR=/tmp/opencore-amr && \
@@ -286,20 +288,6 @@ RUN \
         make install && \
         rm -rf ${DIR}
 
-RUN \
-        dir=/tmp/aom ; \
-        mkdir -p ${dir} ; \
-        cd ${dir} ; \
-        curl -sLO https://aomedia.googlesource.com/aom/+archive/${AOM_VERSION}.tar.gz ; \
-        tar -zx -f ${AOM_VERSION}.tar.gz ; \
-        rm -rf CMakeCache.txt CMakeFiles ; \
-        mkdir -p ./aom_build ; \
-        cd ./aom_build ; \
-        cmake -DCMAKE_INSTALL_PREFIX="${PREFIX}" -DBUILD_SHARED_LIBS=1 ..; \
-        make ; \
-        make install ; \
-        rm -rf ${dir}
-
 ## ffmpeg https://ffmpeg.org/
 RUN  \
         DIR=$(mktemp -d) && cd ${DIR} && \
@@ -345,18 +333,16 @@ RUN  \
         make qt-faststart && \
         cp qt-faststart ${PREFIX}/bin
 
-
+## cleanup
 RUN \
-    ldd ${PREFIX}/bin/ffmpeg | grep opt/ffmpeg | cut -d ' ' -f 3 | xargs -i cp {} /usr/local/lib/ && \
-    cp ${PREFIX}/bin/* /usr/local/bin/ && \
-    cp -r ${PREFIX}/share/ffmpeg /usr/local/share/ && \
-    LD_LIBRARY_PATH=/usr/local/lib ffmpeg -buildconf
+        ldd ${PREFIX}/bin/ffmpeg | grep opt/ffmpeg | cut -d ' ' -f 3 | xargs -i cp {} /usr/local/lib/ && \
+        cp ${PREFIX}/bin/* /usr/local/bin/ && \
+        cp -r ${PREFIX}/share/ffmpeg /usr/local/share/ && \
+        LD_LIBRARY_PATH=/usr/local/lib ffmpeg -buildconf
 
-### Release Stage
 FROM        base AS release
-MAINTAINER ahmet@cetin.info
+MAINTAINER  ahmet@cetin.info
 
-COPY --from=build /usr/local /usr/local
+ENV         LD_LIBRARY_PATH=/usr/local/lib
 
-# Let's make sure the app built correctly
-# Convenient to verify on https://hub.docker.com/r/jrottenberg/ffmpeg/builds/ console output
+COPY --from=build /usr/local /usr/local/
