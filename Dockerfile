@@ -5,7 +5,7 @@ MAINTAINER ahmet@cetin.info
 ENV         LD_LIBRARY_PATH=/usr/local/lib:/usr/local/lib64
 
 RUN     apt-get -yqq update && \
-        apt-get install -yq --no-install-recommends curl && \
+        apt-get install -yq --no-install-recommends curl build-essential && \
         apt-get autoremove -y && \
         apt-get clean -y
 
