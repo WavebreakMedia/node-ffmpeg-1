@@ -13,7 +13,8 @@ RUN apt-get update && apt-get install -yq --no-install-recommends \
         apt-transport-https \
         wget \
         gnupg \
-        ffmpeg
+        ffmpeg \
+        webp
 
 RUN wget https://imagemagick.org/archive/ImageMagick-7.1.0-52.tar.xz
 RUN tar -axvf ImageMagick-7.1.0-52.tar.xz
