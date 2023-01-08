@@ -25,7 +25,7 @@ RUN make install
 RUN ldconfig /usr/local/lib
 WORKDIR /
 
-RUN wget ftp://ftp.icm.edu.pl/pub/unix/graphics/GraphicsMagick/GraphicsMagick-1.3.36.tar.gz
+RUN wget ftp://ftp.icm.edu.pl/pub/unix/graphics/GraphicsMagick/1.3/GraphicsMagick-1.3.36.tar.gz
 RUN tar xzvf GraphicsMagick-1.3.36.tar.gz
 WORKDIR /GraphicsMagick-1.3.36
 RUN ./configure
