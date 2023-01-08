@@ -16,18 +16,18 @@ RUN apt-get update && apt-get install -yq --no-install-recommends \
         ffmpeg \
         webp
 
-RUN wget https://imagemagick.org/archive/ImageMagick-7.1.0-52.tar.xz
-RUN tar -axvf ImageMagick-7.1.0-52.tar.xz
-WORKDIR /ImageMagick-7.1.0-52
+RUN wget https://imagemagick.org/archive/ImageMagick.tar.xz
+RUN tar -axvf ImageMagick.tar.xz
+WORKDIR /ImageMagick
 RUN ls
 RUN ./configure --with-modules
 RUN make install
 RUN ldconfig /usr/local/lib
 WORKDIR /
 
-RUN wget ftp://ftp.icm.edu.pl/pub/unix/graphics/GraphicsMagick/1.3/GraphicsMagick-1.3.19.tar.gz
-RUN tar xzvf GraphicsMagick-1.3.19.tar.gz
-WORKDIR /GraphicsMagick-1.3.19
+RUN wget ftp://ftp.icm.edu.pl/pub/unix/graphics/GraphicsMagick/GraphicsMagick-LATEST.tar.gz
+RUN tar xzvf GraphicsMagick-LATEST.tar.gz
+WORKDIR /GraphicsMagick-LATEST
 RUN ./configure
 RUN make install
 RUN ls
