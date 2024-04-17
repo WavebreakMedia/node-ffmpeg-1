@@ -1,4 +1,4 @@
-FROM node:20-bullseye
+FROM node:16-bullseye
 
 RUN apt-get update && apt-get install -yq --no-install-recommends \
         build-essential \
